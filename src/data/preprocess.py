@@ -17,9 +17,15 @@ def load_config(path: str = "configs/config.yaml") -> dict:
 
 
 def load_dataframe(cfg: dict, project_root: str = ".") -> pd.DataFrame:
-    """Doc CSV 300 ca. Tra ve DataFrame nguyen ban (chua scale)."""
+    """Doc CSV 300 ca. Tra ve DataFrame nguyen ban (chua scale).
+
+    LUU Y QUAN TRONG (bug Plaque_echogenicity): cot nay dung chuoi "None" cho ca am.
+    pd.read_csv MAC DINH coi "None" la gia tri thieu (NaN) -> encode_echo_label nhan nan.
+    Dat keep_default_na=False de GIU "None" la CHUOI thuc su (mot nhan hop le, khong phai NaN).
+    Dataset gia lap day du 300 ca, khong co o trong, nen tat NA mac dinh la an toan.
+    """
     csv_path = os.path.join(project_root, cfg["data"]["csv"])
-    df = pd.read_csv(csv_path)
+    df = pd.read_csv(csv_path, keep_default_na=False)
     assert len(df) == 300, f"Ky vong 300 ca, thuc te {len(df)}"
     return df
 
@@ -32,11 +38,18 @@ def encode_categorical(df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
 
 
 def encode_echo_label(value: str, cfg: dict) -> int:
-    """Echogenicity -> nhan int. 'None' (ca am) -> -100 (ignore_index cho CrossEntropy)."""
+    """Echogenicity -> nhan int. Ca am -> -100 (ignore_index cho CrossEntropy).
+
+    Phong thu nhieu lop: ca am co the den duoi dang "None" (chuoi), NaN (neu CSV
+    bi doc voi NA mac dinh), hoac chuoi rong -> tat ca deu map ve -100.
+    """
     classes = cfg["labels"]["echo_classes"]          # ["Low","Intermediate","High"]
     none_token = cfg["labels"]["echo_none"]           # "None"
+    # Bat truong hop NaN (float) trc khi ep sang chuoi (str(nan) == "nan").
+    if value is None or (isinstance(value, float) and pd.isna(value)):
+        return -100
     v = str(value).strip()
-    if v == none_token:
+    if v == "" or v == none_token or v.lower() == "nan":
         return -100
     return classes.index(v)
 

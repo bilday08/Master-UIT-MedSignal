@@ -15,3 +15,4 @@ matplotlib>=3.7
 tqdm>=4.66
 streamlit>=1.30        # demo lam sang (M5)
 openpyxl>=3.1          # doc file .xlsx neu can
+pytest>=7.4            # chay test suite: pytest tests/ -v (M1 data pipeline)
