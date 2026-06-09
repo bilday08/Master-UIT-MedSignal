@@ -260,7 +260,12 @@ def main() -> None:
     cfg = P.load_config(args.config)
     df = P.load_dataframe(cfg, project_root=args.project_root)
     folds = stratified_folds(df, cfg)[:args.folds]
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if torch.cuda.is_available():
+        device = torch.device("cuda")
+    elif torch.backends.mps.is_available():
+        device = torch.device("mps")
+    else:
+        device = torch.device("cpu")
     print(f"device={device} encoder={args.encoder} folds={len(folds)} epochs={args.epochs}")
 
     fold_results = []

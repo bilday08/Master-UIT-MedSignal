@@ -31,12 +31,15 @@ def encode_categorical(df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
     return df
 
 
-def encode_echo_label(value: str, cfg: dict) -> int:
-    """Echogenicity -> nhan int. 'None' (ca am) -> -100 (ignore_index cho CrossEntropy)."""
+def encode_echo_label(value, cfg: dict) -> int:
+    """Echogenicity -> nhan int. NaN hoac 'None' (ca am) -> -100 (ignore_index cho CrossEntropy)."""
+    import math
     classes = cfg["labels"]["echo_classes"]          # ["Low","Intermediate","High"]
     none_token = cfg["labels"]["echo_none"]           # "None"
+    if value is None or (isinstance(value, float) and math.isnan(value)):
+        return -100
     v = str(value).strip()
-    if v == none_token:
+    if v == none_token or v == "nan":
         return -100
     return classes.index(v)
 
