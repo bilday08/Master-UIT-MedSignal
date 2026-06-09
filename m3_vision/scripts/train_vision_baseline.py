@@ -136,7 +136,8 @@ def train_one_fold(df, train_idx, val_idx, cfg, args, device, fold_id: int) -> d
         dropout=cfg["train"]["dropout"],
     ).to(device)
 
-    pos_weight = torch.tensor([P.compute_pos_weight(df_train, cfg)], device=device)
+    pw_val = P.compute_pos_weight(df_train, cfg) * args.pos_weight_scale
+    pos_weight = torch.tensor([pw_val], device=device)
     criterion = torch.nn.BCEWithLogitsLoss(pos_weight=pos_weight)
     optimizer = torch.optim.AdamW(
         model.parameters(),
@@ -164,7 +165,7 @@ def train_one_fold(df, train_idx, val_idx, cfg, args, device, fold_id: int) -> d
             model,
             val_loader,
             device,
-            threshold=cfg["eval"]["decision_threshold"],
+            threshold=args.threshold,
             max_batches=args.max_val_batches,
         )
         metrics["train_loss"] = round(train_loss, 4)
@@ -250,6 +251,10 @@ def main() -> None:
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--max-train-batches", type=int, default=None)
     parser.add_argument("--max-val-batches", type=int, default=None)
+    parser.add_argument("--pos-weight-scale", type=float, default=1.0,
+                        help="Nhân thêm vào pos_weight (default 1.0 = không scale; dùng 2.0+ để force dương)")
+    parser.add_argument("--threshold", type=float, default=None,
+                        help="Decision threshold (default: đọc từ config eval.decision_threshold)")
     parser.add_argument("--early-stop", action="store_true", help="Enable early stopping")
     parser.add_argument("--early-stop-patience", type=int, default=7, help="Patience epochs for early stopping")
     parser.add_argument("--output", default="m3_vision/results/vision_baseline_metrics.json")
@@ -258,6 +263,8 @@ def main() -> None:
 
     set_seed(args.seed)
     cfg = P.load_config(args.config)
+    if args.threshold is None:
+        args.threshold = cfg["eval"].get("decision_threshold", 0.5)
     df = P.load_dataframe(cfg, project_root=args.project_root)
     folds = stratified_folds(df, cfg)[:args.folds]
     if torch.cuda.is_available():
