@@ -53,6 +53,7 @@ train:
     risk: 0.5
   # Xu ly mat can bang lop plaque (95/205 ~ 32% duong).
   pos_weight_auto: true     # tu tinh pos_weight = n_neg/n_pos cho BCE
+  pos_weight_scale: 2.0     # nhan them he so de force model du doan lop duong (4-5x so goc)
 
 vision:
   encoder: "resnet18"       # "resnet18" | "custom_cnn"
@@ -71,4 +72,4 @@ eval:
   # Nguong discordance GIU NGUYEN goc - bao cao trung thuc (n=18, 6 duong).
   discordance_ldl_max: 130
   discordance_lpa_min: 50
-  decision_threshold: 0.5
+  decision_threshold: 0.3   # ha xuong de tang Sensitivity (anh gia lap, model bias ve lop am)
