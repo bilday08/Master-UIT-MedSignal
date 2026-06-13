@@ -1,0 +1,15 @@
+train:
+  batch_size: 32
+  epochs: 30
+  lr: 0.0003
+  weight_decay: 0.0001
+  dropout: 0.3
+  loss_weights: {plaque: 1.0, echo: 0.5, risk: 0.5}
+  pos_weight_auto: true
+  pos_weight_scale: 2.0    # baseline: scale cao -> collapse toàn dương
+  patience: 7
+
+eval:
+  decision_threshold: 0.3  # fixed threshold
+
+# Notes: baseline run đã chạy trước, results copy từ /tmp/fusion_train.log

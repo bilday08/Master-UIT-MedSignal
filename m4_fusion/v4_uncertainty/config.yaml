@@ -1,0 +1,17 @@
+train:
+  batch_size: 32
+  epochs: 30
+  lr: 0.0003
+  weight_decay: 0.0001
+  dropout: 0.3
+  pos_weight_auto: true
+  pos_weight_scale: 1.2
+  patience: 7
+
+eval:
+  decision_threshold: "auto"
+
+improvements:
+  - Tất cả v2 (WeightedSampler + optimal threshold + pos_weight_scale=1.2)
+  - Uncertainty Weighting (Kendall 2018): log_var learnable thay trọng số cố định
+  - Loss = sum_i [ L_i / (2*sigma_i^2) + log(sigma_i) ]

@@ -1,0 +1,108 @@
+{
+  "version": "v2_sampler_threshold",
+  "description": "WeightedRandomSampler + optimal threshold (Youden) + pos_weight_scale=1.2",
+  "summary": {
+    "sensitivity": {
+      "mean": 0.5368,
+      "std": 0.1172
+    },
+    "specificity": {
+      "mean": 0.8683,
+      "std": 0.0933
+    },
+    "f1": {
+      "mean": 0.5841,
+      "std": 0.0559
+    },
+    "auc_roc": {
+      "mean": 0.7322,
+      "std": 0.0368
+    },
+    "pr_auc": {
+      "mean": 0.6598,
+      "std": 0.0431
+    },
+    "best_threshold": {
+      "mean": 0.7322,
+      "std": 0.1295
+    },
+    "macro_f1": {
+      "mean": 0.5185,
+      "std": 0.3931
+    },
+    "mae": {
+      "mean": 0.5255,
+      "std": 0.0635
+    },
+    "r2": {
+      "mean": -0.1468,
+      "std": 0.1271
+    },
+    "val_loss": {
+      "mean": 2.4867,
+      "std": 1.1985
+    }
+  },
+  "fold_results": [
+    {
+      "sensitivity": 0.6316,
+      "specificity": 0.7317,
+      "f1": 0.5714,
+      "auc_roc": 0.715,
+      "pr_auc": 0.6023,
+      "best_threshold": 0.8539,
+      "macro_f1": 0.1975,
+      "mae": 0.4292,
+      "r2": -0.0061,
+      "val_loss": 2.9393
+    },
+    {
+      "sensitivity": 0.6316,
+      "specificity": 0.8049,
+      "f1": 0.6154,
+      "auc_roc": 0.742,
+      "pr_auc": 0.6955,
+      "best_threshold": 0.5801,
+      "macro_f1": 1.0,
+      "mae": 0.5118,
+      "r2": -0.1056,
+      "val_loss": 1.0202
+    },
+    {
+      "sensitivity": 0.5789,
+      "specificity": 0.878,
+      "f1": 0.6286,
+      "auc_roc": 0.7741,
+      "pr_auc": 0.6751,
+      "best_threshold": 0.7377,
+      "macro_f1": 1.0,
+      "mae": 0.6014,
+      "r2": -0.0292,
+      "val_loss": 1.1984
+    },
+    {
+      "sensitivity": 0.3158,
+      "specificity": 1.0,
+      "f1": 0.48,
+      "auc_roc": 0.6701,
+      "pr_auc": 0.6157,
+      "best_threshold": 0.8957,
+      "macro_f1": 0.1975,
+      "mae": 0.5892,
+      "r2": -0.3149,
+      "val_loss": 4.146
+    },
+    {
+      "sensitivity": 0.5263,
+      "specificity": 0.9268,
+      "f1": 0.625,
+      "auc_roc": 0.7599,
+      "pr_auc": 0.7102,
+      "best_threshold": 0.5937,
+      "macro_f1": 0.1975,
+      "mae": 0.4957,
+      "r2": -0.278,
+      "val_loss": 3.1295
+    }
+  ]
+}

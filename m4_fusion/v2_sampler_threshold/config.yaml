@@ -1,0 +1,18 @@
+train:
+  batch_size: 32
+  epochs: 30
+  lr: 0.0003
+  weight_decay: 0.0001
+  dropout: 0.3
+  loss_weights: {plaque: 1.0, echo: 0.5, risk: 0.5}
+  pos_weight_auto: true
+  pos_weight_scale: 1.2    # giảm từ 2.0 -> tránh collapse
+  patience: 7
+
+eval:
+  decision_threshold: "auto"  # optimal threshold per fold (Youden index)
+
+improvements:
+  - WeightedRandomSampler thay shuffle=True
+  - pos_weight_scale 2.0 -> 1.2
+  - Optimal threshold per fold (max F1 trên val set)
