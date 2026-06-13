@@ -83,13 +83,14 @@ def get_case(pid: str) -> dict | None:
 
 
 def ablation_table() -> dict:
-    """Tong hop 4 model x 3 task tu JSON M2/M4 (so lieu 5-fold that, KHONG tu model demo).
+    """Tong hop cac model x 3 task tu JSON M2/M3/M4 (so lieu 5-fold that, KHONG tu model demo).
 
     Tra ve: { plaque: [{model, auc_roc, pr_auc, ...}], echo: [...], risk: [...] }
     """
     rows_tab = _read_tabular_baselines()
+    rows_vision = _read_vision()
     rows_fusion = _read_fusion()
-    models = rows_tab + rows_fusion
+    models = rows_tab + rows_vision + rows_fusion
 
     plaque, echo, risk = [], [], []
     for m in models:
@@ -130,6 +131,15 @@ def _read_tabular_baselines() -> list[dict]:
         if key in data:
             out.append({"model": name, "summary": data[key]})
     return out
+
+
+def _read_vision() -> list[dict]:
+    """Dong Vision-IMT-CNN (chi co task plaque; echo/risk de trong)."""
+    path = PROJECT_ROOT / "notebooks" / "vision_custom_cnn_30epoch_metrics.json"
+    if not path.exists():
+        return []
+    data = json.loads(path.read_text())
+    return [{"model": "Vision-IMT-CNN", "summary": data.get("summary", {})}]
 
 
 def _read_fusion() -> list[dict]:

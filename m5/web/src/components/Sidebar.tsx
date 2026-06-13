@@ -2,14 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Activity, BarChart3, Microscope } from "lucide-react";
+import { Activity, BarChart3 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 const NAV = [
   { href: "/", label: "Chẩn đoán", icon: Activity, desc: "Dự đoán cho 1 bệnh nhân" },
   { href: "/results", label: "Hiệu năng", icon: BarChart3, desc: "So sánh các mô hình" },
-  { href: "/explain", label: "Diễn giải", icon: Microscope, desc: "Giải thích kết quả" },
 ];
 
 export function Sidebar() {

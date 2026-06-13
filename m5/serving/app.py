@@ -13,7 +13,7 @@ import os
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from PIL import Image, UnidentifiedImageError
 
 from m5.serving.common import ARTIFACT_DIR
@@ -120,5 +120,47 @@ def image(name: str) -> FileResponse:
 
 @app.get("/ablation")
 def ablation() -> dict:
-    """Bang ablation 4 model x 3 task (so lieu 5-fold tu M2/M4)."""
+    """Bang ablation cac model x 3 task (so lieu 5-fold tu M2/M3/M4)."""
     return ablation_table()
+
+
+@app.post("/gradcam")
+async def gradcam(
+    tabular: str = Form(...),
+    imt_image: UploadFile = File(...),
+    cca_images: list[UploadFile] = File(default=[]),
+) -> Response:
+    """Heatmap Grad-CAM tren anh IMT (theo task plaque). Tra PNG."""
+    from m5.serving.explain_service import gradcam_png
+
+    try:
+        tab = json.loads(tabular)
+    except json.JSONDecodeError as err:
+        raise HTTPException(400, f"`tabular` không phải JSON hợp lệ: {err}") from err
+    imt = _read_image(imt_image)
+    cca = [_read_image(f) for f in cca_images] if cca_images else None
+    try:
+        png = gradcam_png(tab, imt, cca)
+    except FileNotFoundError as err:
+        raise HTTPException(503, "Mô hình chưa sẵn sàng, vui lòng thử lại sau.") from err
+    return Response(content=png, media_type="image/png")
+
+
+@app.get("/shap/global")
+def shap_global_endpoint() -> dict:
+    """SHAP global: muc do anh huong cua tung chi so lipid toi du doan plaque."""
+    from m5.serving.explain_service import shap_global
+
+    return {"features": shap_global()}
+
+
+@app.post("/shap/local")
+async def shap_local_endpoint(tabular: str = Form(...)) -> dict:
+    """SHAP cho 1 ca: chi so nao day du doan plaque len/xuong."""
+    from m5.serving.explain_service import shap_local
+
+    try:
+        tab = json.loads(tabular)
+    except json.JSONDecodeError as err:
+        raise HTTPException(400, f"`tabular` không phải JSON hợp lệ: {err}") from err
+    return {"features": shap_local(tab)}

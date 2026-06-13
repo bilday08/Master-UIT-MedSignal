@@ -49,10 +49,13 @@ import {
   fetchImageFile,
   getCase,
   getCases,
+  gradcam,
   NUMERIC_FEATURES,
   predict,
+  shapLocal,
   type CaseSummary,
   type PredictResult,
+  type ShapContribution,
   type TabularInput,
 } from "@/lib/api";
 
@@ -335,9 +338,13 @@ function CaseCombobox({
 export function PredictionForm({
   onResult,
   onLoadingChange,
+  onGradcam,
+  onShap,
 }: {
   onResult: (r: PredictResult) => void;
   onLoadingChange?: (loading: boolean) => void;
+  onGradcam?: (url: string | null) => void;
+  onShap?: (shap: ShapContribution[] | null) => void;
 }) {
   const [values, setValues] = React.useState<Record<string, string>>(DEFAULTS);
   const [sex, setSex] = React.useState<"Male" | "Female">("Male");
@@ -396,8 +403,18 @@ export function PredictionForm({
     for (const f of NUMERIC_FEATURES) tabular[f] = Number(values[f]);
     setLoading(true);
     onLoadingChange?.(true);
+    onGradcam?.(null);
+    onShap?.(null);
     try {
-      onResult(await predict(tabular, imt[0], cca));
+      const r = await predict(tabular, imt[0], cca);
+      // Grad-CAM + SHAP local (best-effort, khong chan ket qua chinh).
+      const [cam, shap] = await Promise.all([
+        gradcam(tabular, imt[0], cca).catch(() => null),
+        shapLocal(tabular).catch(() => null),
+      ]);
+      onResult(r);
+      onGradcam?.(cam);
+      onShap?.(shap);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
