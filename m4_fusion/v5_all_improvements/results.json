@@ -1,0 +1,108 @@
+{
+  "version": "v5_all_improvements",
+  "description": "custom_cnn + tab_dim=128 + CrossAttention + SMOTE + CosLR + GradClip + FocalLoss",
+  "summary": {
+    "sensitivity": {
+      "mean": 0.6105,
+      "std": 0.1272
+    },
+    "specificity": {
+      "mean": 0.8244,
+      "std": 0.1208
+    },
+    "f1": {
+      "mean": 0.6127,
+      "std": 0.0416
+    },
+    "auc_roc": {
+      "mean": 0.7112,
+      "std": 0.029
+    },
+    "pr_auc": {
+      "mean": 0.6138,
+      "std": 0.0395
+    },
+    "best_threshold": {
+      "mean": 0.6322,
+      "std": 0.0218
+    },
+    "macro_f1": {
+      "mean": 0.4875,
+      "std": 0.2607
+    },
+    "mae": {
+      "mean": 0.4924,
+      "std": 0.0807
+    },
+    "r2": {
+      "mean": 0.0851,
+      "std": 0.1361
+    },
+    "val_loss": {
+      "mean": 0.7091,
+      "std": 0.1858
+    }
+  },
+  "fold_results": [
+    {
+      "sensitivity": 0.7895,
+      "specificity": 0.6098,
+      "f1": 0.6,
+      "auc_roc": 0.7022,
+      "pr_auc": 0.5682,
+      "best_threshold": 0.636,
+      "macro_f1": 0.1975,
+      "mae": 0.4451,
+      "r2": 0.0644,
+      "val_loss": 0.8492
+    },
+    {
+      "sensitivity": 0.7368,
+      "specificity": 0.8049,
+      "f1": 0.6829,
+      "auc_roc": 0.7471,
+      "pr_auc": 0.6668,
+      "best_threshold": 0.6515,
+      "macro_f1": 0.5758,
+      "mae": 0.4381,
+      "r2": 0.1849,
+      "val_loss": 0.7656
+    },
+    {
+      "sensitivity": 0.4737,
+      "specificity": 0.9512,
+      "f1": 0.6,
+      "auc_roc": 0.7176,
+      "pr_auc": 0.6419,
+      "best_threshold": 0.6199,
+      "macro_f1": 0.1975,
+      "mae": 0.6432,
+      "r2": -0.1227,
+      "val_loss": 0.945
+    },
+    {
+      "sensitivity": 0.5263,
+      "specificity": 0.8293,
+      "f1": 0.5556,
+      "auc_roc": 0.6611,
+      "pr_auc": 0.5686,
+      "best_threshold": 0.5969,
+      "macro_f1": 0.8796,
+      "mae": 0.5092,
+      "r2": 0.0257,
+      "val_loss": 0.5078
+    },
+    {
+      "sensitivity": 0.5263,
+      "specificity": 0.9268,
+      "f1": 0.625,
+      "auc_roc": 0.7279,
+      "pr_auc": 0.6234,
+      "best_threshold": 0.6566,
+      "macro_f1": 0.5873,
+      "mae": 0.4262,
+      "r2": 0.2734,
+      "val_loss": 0.4777
+    }
+  ]
+}

@@ -29,7 +29,14 @@ MANIFEST
 # Virtual environments
 .venv
 pip-log.txt
+# M5 model artifacts (freeze output, sinh lai bang freeze_model.py)
+m5/serving/artifacts/
 pip-delete-this-directory.txt
+
+# Superpowers (brainstorming specs, plans)
+superpowers/
+docs/superpowers/**
+.superpowers/
 
 # PyCharm
 .idea/
@@ -111,3 +118,5 @@ ehthumbs.db
 *.mov
 cache/
 temp/
+
+/local
