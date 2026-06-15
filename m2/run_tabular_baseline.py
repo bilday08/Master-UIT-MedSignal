@@ -1,4 +1,5 @@
 """M2 tabular baseline runner: XGBoost, LightGBM, TabularMLP, LDL-only — 5-fold."""
+
 from __future__ import annotations
 import json, sys
 from pathlib import Path
@@ -12,8 +13,12 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from src.data import preprocess as P
 from src.data.splits import stratified_folds
 from src.eval.metrics import aggregate_folds, classification_metrics
-from src.models.baselines import (build_tree_classifier, build_risk_regressor,
-                                   ldl_only_features, lipid_panel_features)
+from src.models.baselines import (
+    build_tree_classifier,
+    build_risk_regressor,
+    ldl_only_features,
+    lipid_panel_features,
+)
 from src.models.tabular import TabularClassifier
 
 
@@ -54,29 +59,40 @@ def run_mlp_cv(df, folds, cfg, epochs=50, lr=3e-4, device="cpu"):
         df_va_enc = P.apply_scaler(P.encode_categorical(df_va, cfg), scaler, cfg)
         X_tr = torch.tensor(df_tr_enc[feat_cols].values, dtype=torch.float32).to(device)
         X_va = torch.tensor(df_va_enc[feat_cols].values, dtype=torch.float32).to(device)
-        y_tr = torch.tensor(df_tr[cfg["columns"]["target_plaque"]].values,
-                            dtype=torch.float32).unsqueeze(1).to(device)
+        y_tr = (
+            torch
+            .tensor(df_tr[cfg["columns"]["target_plaque"]].values, dtype=torch.float32)
+            .unsqueeze(1)
+            .to(device)
+        )
         y_va = df_va[cfg["columns"]["target_plaque"]].values
 
-        n_neg = int((y_tr == 0).sum()); n_pos = int((y_tr == 1).sum())
+        n_neg = int((y_tr == 0).sum())
+        n_pos = int((y_tr == 1).sum())
         pw = torch.tensor([n_neg / max(n_pos, 1) * 2.0], device=device)
-        model = TabularClassifier(in_dim=in_dim, hidden=(64, 32), dropout=0.3).to(device)
+        model = TabularClassifier(in_dim=in_dim, hidden=(64, 32), dropout=0.3).to(
+            device
+        )
         opt = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
         crit = torch.nn.BCEWithLogitsLoss(pos_weight=pw)
 
         best_prob, best_score = None, -1
         patience, patience_counter = 7, 0
         for _ in range(epochs):
-            model.train(); opt.zero_grad()
+            model.train()
+            opt.zero_grad()
             loss = crit(model(X_tr), y_tr)
-            loss.backward(); opt.step()
+            loss.backward()
+            opt.step()
             model.eval()
             with torch.no_grad():
                 prob = torch.sigmoid(model(X_va)).squeeze(1).cpu().numpy()
             m = classification_metrics(y_va, prob, threshold=0.3)
             score = m.get("pr_auc", 0.0)
             if score > best_score:
-                best_score = score; best_prob = prob; patience_counter = 0
+                best_score = score
+                best_prob = prob
+                patience_counter = 0
             else:
                 patience_counter += 1
                 if patience_counter >= patience:
