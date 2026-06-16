@@ -1,0 +1,112 @@
+{
+  "xgboost_all": {
+    "sensitivity": {
+      "mean": 0.5263,
+      "std": 0.0333
+    },
+    "specificity": {
+      "mean": 0.6585,
+      "std": 0.0672
+    },
+    "f1": {
+      "mean": 0.4662,
+      "std": 0.0286
+    },
+    "auc_roc": {
+      "mean": 0.6639,
+      "std": 0.0269
+    },
+    "pr_auc": {
+      "mean": 0.6152,
+      "std": 0.0306
+    }
+  },
+  "lightgbm_all": {
+    "sensitivity": {
+      "mean": 0.5474,
+      "std": 0.0537
+    },
+    "specificity": {
+      "mean": 0.6097,
+      "std": 0.0511
+    },
+    "f1": {
+      "mean": 0.4582,
+      "std": 0.0376
+    },
+    "auc_roc": {
+      "mean": 0.6367,
+      "std": 0.0474
+    },
+    "pr_auc": {
+      "mean": 0.5775,
+      "std": 0.05
+    }
+  },
+  "xgboost_ldl_only": {
+    "sensitivity": {
+      "mean": 0.6421,
+      "std": 0.0905
+    },
+    "specificity": {
+      "mean": 0.4244,
+      "std": 0.0795
+    },
+    "f1": {
+      "mean": 0.4457,
+      "std": 0.0601
+    },
+    "auc_roc": {
+      "mean": 0.5801,
+      "std": 0.0998
+    },
+    "pr_auc": {
+      "mean": 0.4172,
+      "std": 0.0792
+    }
+  },
+  "xgboost_lipid_panel": {
+    "sensitivity": {
+      "mean": 0.4737,
+      "std": 0.0666
+    },
+    "specificity": {
+      "mean": 0.5171,
+      "std": 0.0891
+    },
+    "f1": {
+      "mean": 0.3756,
+      "std": 0.0259
+    },
+    "auc_roc": {
+      "mean": 0.5012,
+      "std": 0.0423
+    },
+    "pr_auc": {
+      "mean": 0.3788,
+      "std": 0.047
+    }
+  },
+  "tabular_mlp": {
+    "sensitivity": {
+      "mean": 1.0,
+      "std": 0.0
+    },
+    "specificity": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "f1": {
+      "mean": 0.481,
+      "std": 0.0
+    },
+    "auc_roc": {
+      "mean": 0.707,
+      "std": 0.0312
+    },
+    "pr_auc": {
+      "mean": 0.6273,
+      "std": 0.053
+    }
+  }
+}

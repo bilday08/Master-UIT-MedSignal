@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 class MultiTaskLoss(nn.Module):
@@ -18,13 +19,18 @@ class MultiTaskLoss(nn.Module):
     def __init__(self, weights: dict, pos_weight: float | None = None):
         super().__init__()
         self.w = weights
-        pw = torch.tensor([pos_weight]) if pos_weight is not None else None
-        self.bce = nn.BCEWithLogitsLoss(pos_weight=pw)
+        self.pos_weight_val = pos_weight
+        self.bce = nn.BCEWithLogitsLoss()
         self.ce = nn.CrossEntropyLoss(ignore_index=-100)
         self.smooth_l1 = nn.SmoothL1Loss()
 
     def forward(self, outputs: dict, labels: dict) -> tuple[torch.Tensor, dict]:
-        l_plaque = self.bce(outputs["plaque"], labels["plaque"])
+        if self.pos_weight_val is not None:
+            pw = torch.tensor([self.pos_weight_val], device=outputs["plaque"].device)
+            l_plaque = F.binary_cross_entropy_with_logits(
+                outputs["plaque"], labels["plaque"], pos_weight=pw)
+        else:
+            l_plaque = self.bce(outputs["plaque"], labels["plaque"])
         l_echo = self.ce(outputs["echo"], labels["echo"].squeeze(1))
         l_risk = self.smooth_l1(outputs["risk"], labels["risk"])
 

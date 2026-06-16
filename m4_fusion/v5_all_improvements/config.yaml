@@ -1,0 +1,25 @@
+train:
+  batch_size: 32
+  epochs: 50              # tăng epoch vì model nhỏ hơn, converge cần nhiều step hơn
+  lr: 0.0003
+  weight_decay: 0.0001
+  dropout: 0.3
+  pos_weight_auto: true
+  pos_weight_scale: 1.2
+  focal_gamma: 2.0
+  grad_clip_norm: 1.0     # NEW: gradient clipping
+  patience: 10            # tăng patience vì epoch nhiều hơn
+
+eval:
+  decision_threshold: "auto"  # Youden Index per fold
+
+improvements:
+  - encoder: custom_cnn (64K params, thay resnet18 22.5M)
+  - tabular.feat_dim: 32 -> 128 (cân bằng với vision)
+  - fusion: CrossAttention thay concat đơn giản
+  - loss: Focal Loss gamma=2.0 (from v3)
+  - sampler: WeightedRandomSampler (from v2)
+  - data: SMOTE trên tabular training fold
+  - training: CosineAnnealingLR scheduler
+  - training: gradient clipping max_norm=1.0
+  - threshold: Youden Index per fold (from v2)

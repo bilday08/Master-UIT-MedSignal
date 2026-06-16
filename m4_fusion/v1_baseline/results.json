@@ -1,0 +1,15 @@
+{
+  "version": "v1_baseline",
+  "description": "Baseline fusion: pos_weight_scale=2.0, fixed threshold=0.3, shuffle=True",
+  "summary": {
+    "sensitivity": {"mean": 1.0,    "std": 0.0},
+    "specificity": {"mean": 0.0,    "std": 0.0},
+    "f1":          {"mean": 0.481,  "std": 0.0},
+    "auc_roc":     {"mean": 0.7291, "std": 0.049},
+    "pr_auc":      {"mean": 0.6729, "std": 0.0412},
+    "macro_f1":    {"mean": 0.6698, "std": 0.1651},
+    "mae":         {"mean": 0.5249, "std": 0.0562},
+    "r2":          {"mean": -0.0634,"std": 0.1252}
+  },
+  "issue": "Model collapse: predicts all positive on every fold"
+}

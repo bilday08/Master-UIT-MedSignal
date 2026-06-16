@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 
 class ImageEncoder(nn.Module):
@@ -42,6 +41,22 @@ class ImageEncoder(nn.Module):
         return self.proj(self.backbone(x))
 
 
+class VisionPlaqueClassifier(nn.Module):
+    """
+    Baseline M3: IMT-only classifier cho Plaque_present.
+    Chi nhan anh IMT [B,1,256,256], khong nhan CCA de tranh leakage.
+    """
+
+    def __init__(self, encoder: str = "resnet18", feat_dim: int = 128,
+                 pretrained: bool = False, dropout: float = 0.3):
+        super().__init__()
+        self.encoder = ImageEncoder(encoder, feat_dim, pretrained, dropout)
+        self.classifier = nn.Linear(feat_dim, 1)
+
+    def forward(self, imt_img: torch.Tensor) -> torch.Tensor:
+        return self.classifier(self.encoder(imt_img))
+
+
 class AttentionPool(nn.Module):
     """
     Gated attention pooling (Ilse et al. 2018) gop K feature anh -> 1 vector, CO mask.
@@ -58,7 +73,8 @@ class AttentionPool(nn.Module):
         self.attn_U = nn.Linear(dim, hidden)
         self.attn_w = nn.Linear(hidden, 1)
 
-    def forward(self, feats: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
+    def forward(self, feats: torch.Tensor, mask: torch.Tensor,
+                return_weights: bool = False):
         a = torch.tanh(self.attn_V(feats)) * torch.sigmoid(self.attn_U(feats))  # [B,K,H]
         scores = self.attn_w(a).squeeze(-1)                                     # [B,K]
         scores = scores.masked_fill(~mask, float("-inf"))
@@ -68,6 +84,27 @@ class AttentionPool(nn.Module):
         weights = torch.nan_to_num(weights, nan=0.0)
         pooled = torch.bmm(weights.unsqueeze(1), feats).squeeze(1)              # [B,D]
         pooled = pooled.masked_fill(all_masked, 0.0)
+        if return_weights:
+            return pooled, weights
+        return pooled
+
+
+class MaskedMeanPool(nn.Module):
+    """
+    Ablation pooling don gian: mean theo CCA feature that, co mask.
+    Control (khong co CCA) -> vector 0.
+    """
+
+    def forward(self, feats: torch.Tensor, mask: torch.Tensor,
+                return_weights: bool = False):
+        weights = mask.float()
+        denom = weights.sum(dim=1, keepdim=True).clamp_min(1.0)
+        weights = weights / denom
+        pooled = torch.bmm(weights.unsqueeze(1), feats).squeeze(1)
+        all_masked = (~mask).all(dim=1, keepdim=True)
+        pooled = pooled.masked_fill(all_masked, 0.0)
+        if return_weights:
+            return pooled, weights
         return pooled
 
 
@@ -77,16 +114,25 @@ class VisionBranch(nn.Module):
     Tra ve (imt_feat [B,D], cca_feat [B,D]).
     """
 
-    def __init__(self, encoder="resnet18", feat_dim=128, pretrained=False, dropout=0.3):
+    def __init__(self, encoder="resnet18", feat_dim=128, pretrained=False,
+                 dropout=0.3, pooling: str = "attention"):
         super().__init__()
         self.imt_encoder = ImageEncoder(encoder, feat_dim, pretrained, dropout)
         self.cca_encoder = ImageEncoder(encoder, feat_dim, pretrained, dropout)
-        self.cca_pool = AttentionPool(feat_dim)
+        if pooling == "attention":
+            self.cca_pool = AttentionPool(feat_dim)
+        elif pooling == "mean":
+            self.cca_pool = MaskedMeanPool()
+        else:
+            raise ValueError(f"pooling khong ho tro: {pooling}")
 
-    def forward(self, imt_img, cca_imgs, cca_mask):
+    def forward(self, imt_img, cca_imgs, cca_mask, return_attention: bool = False):
         imt_feat = self.imt_encoder(imt_img)                 # [B,D]
         B, K = cca_imgs.shape[0], cca_imgs.shape[1]
         flat = cca_imgs.view(B * K, *cca_imgs.shape[2:])      # [B*K,1,H,W]
         cca_feats = self.cca_encoder(flat).view(B, K, -1)     # [B,K,D]
+        if return_attention:
+            cca_feat, weights = self.cca_pool(cca_feats, cca_mask, return_weights=True)
+            return imt_feat, cca_feat, weights
         cca_feat = self.cca_pool(cca_feats, cca_mask)         # [B,D]
         return imt_feat, cca_feat
