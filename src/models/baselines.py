@@ -105,10 +105,10 @@ def run_cv_classifier(
     for tr_idx, va_idx in folds:
         df_tr, df_va = df.iloc[tr_idx], df.iloc[va_idx]
 
-        # Scaler fit CHI tren train
-        scaler = P.fit_scaler(P.encode_categorical(df_tr, cfg), cfg)
-        df_tr_sc = P.apply_scaler(P.encode_categorical(df_tr, cfg), scaler, cfg)
-        df_va_sc = P.apply_scaler(P.encode_categorical(df_va, cfg), scaler, cfg)
+        # Scaler fit CHI tren train (df da duoc encode_categorical tu truoc)
+        scaler = P.fit_scaler(df_tr, cfg)
+        df_tr_sc = P.apply_scaler(df_tr, scaler, cfg)
+        df_va_sc = P.apply_scaler(df_va, scaler, cfg)
 
         if feature_fn is not None:
             X_tr = feature_fn(df_tr_sc)
@@ -165,9 +165,10 @@ def run_cv_regressor(
     for tr_idx, va_idx in folds:
         df_tr, df_va = df.iloc[tr_idx], df.iloc[va_idx]
 
-        scaler = P.fit_scaler(P.encode_categorical(df_tr, cfg), cfg)
-        df_tr_sc = P.apply_scaler(P.encode_categorical(df_tr, cfg), scaler, cfg)
-        df_va_sc = P.apply_scaler(P.encode_categorical(df_va, cfg), scaler, cfg)
+        # Scaler fit CHI tren train (df da duoc encode_categorical tu truoc)
+        scaler = P.fit_scaler(df_tr, cfg)
+        df_tr_sc = P.apply_scaler(df_tr, scaler, cfg)
+        df_va_sc = P.apply_scaler(df_va, scaler, cfg)
 
         X_tr = df_tr_sc[feat_cols].values.astype(np.float32)
         X_va = df_va_sc[feat_cols].values.astype(np.float32)
