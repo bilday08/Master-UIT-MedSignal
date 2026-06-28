@@ -20,6 +20,7 @@ from m5.serving.common import ARTIFACT_DIR
 from m5.serving.inference import get_predictor
 from m5.serving.samples import (
     ablation_table,
+    discordance_data,
     get_case,
     images_dir,
     list_cases,
@@ -122,6 +123,12 @@ def image(name: str) -> FileResponse:
 def ablation() -> dict:
     """Bang ablation cac model x 3 task (so lieu 5-fold tu M2/M3/M4)."""
     return ablation_table()
+
+
+@app.get("/discordance")
+def discordance() -> dict:
+    """Phan tich discordance (LDL thap + Lp(a) cao): LDL-only vs Tabular vs Multimodal."""
+    return discordance_data()
 
 
 @app.post("/gradcam")

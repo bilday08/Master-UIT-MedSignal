@@ -115,22 +115,103 @@ def _mean(summary: dict, key: str):
     return v
 
 
+def _m2_baselines() -> dict:
+    path = PROJECT_ROOT / "m2" / "m2_baselines.json"
+    return json.loads(path.read_text()) if path.exists() else {}
+
+
 def _read_tabular_baselines() -> list[dict]:
-    path = PROJECT_ROOT / "notebooks" / "tabular_baseline_metrics.json"
-    if not path.exists():
-        return []
-    data = json.loads(path.read_text())
-    # Chi lay 3 model chinh cho bang ablation. ldl_only/lipid_panel thuoc discordance.
+    """3 model tabular chinh cho ablation: plaque tu classification, risk tu regression."""
+    data = _m2_baselines()
+    cls = data.get("classification", {})
+    reg = data.get("regression", {})
     label = {
-        "xgboost_all": "Tabular-XGBoost",
-        "lightgbm_all": "Tabular-LightGBM",
-        "tabular_mlp": "Tabular-MLP",
+        "xgboost": "Tabular-XGBoost",
+        "lightgbm": "Tabular-LightGBM",
+        "mlp": "Tabular-MLP",
     }
     out = []
     for key, name in label.items():
-        if key in data:
-            out.append({"model": name, "summary": data[key]})
+        if key not in cls:
+            continue
+        summary = dict(cls[key])  # plaque metrics (sens/spec/f1/auc/pr-auc)
+        if key in reg:  # them risk mae/r2
+            summary["mae"] = reg[key].get("mae")
+            summary["r2"] = reg[key].get("r2")
+        out.append({"model": name, "summary": summary})
     return out
+
+
+def _multimodal_discordance() -> dict | None:
+    """Sens/Spec/F1 cua Multimodal (v3) tren 18 ca discordance, tu OOF cua M4."""
+    path = PROJECT_ROOT / "m4_fusion" / "v3_focal_loss" / "discordance_oof.csv"
+    if not path.exists():
+        return None
+    import csv
+    rows = list(csv.DictReader(path.open()))
+    pos = [r for r in rows if r["plaque_true"] == "1"]
+    neg = [r for r in rows if r["plaque_true"] == "0"]
+    tp = sum(1 for r in pos if r["plaque_pred"] == "1")
+    fp = sum(1 for r in neg if r["plaque_pred"] == "1")
+    tn = len(neg) - fp
+    sens = tp / len(pos) if pos else None
+    spec = tn / len(neg) if neg else None
+    prec = tp / (tp + fp) if (tp + fp) else 0.0
+    f1 = (2 * prec * sens / (prec + sens)) if sens and (prec + sens) else 0.0
+    return {
+        "sensitivity": round(sens, 4) if sens is not None else None,
+        "specificity": round(spec, 4) if spec is not None else None,
+        "f1": round(f1, 4),
+    }
+
+
+def _discordance_cases() -> list[dict]:
+    """18 ca discordance kem du doan Multimodal (tu OOF csv)."""
+    path = PROJECT_ROOT / "m4_fusion" / "v3_focal_loss" / "discordance_oof.csv"
+    if not path.exists():
+        return []
+    import csv
+    out = []
+    for r in csv.DictReader(path.open()):
+        out.append({
+            "patient_id": r["patient_id"],
+            "ldl": float(r["LDL_C_mg_dL"]),
+            "lpa": float(r["Lp(a)_mg_dL"]),
+            "plaque_true": int(r["plaque_true"]),
+            "plaque_pred": int(r["plaque_pred"]),
+            "plaque_prob": round(float(r["plaque_prob"]), 4),
+        })
+    return out
+
+
+def discordance_data() -> dict:
+    """Phan tich discordance (LDL<130 & Lp(a)>=50): LDL-only vs Tabular vs Multimodal.
+
+    Nguon: m2_baselines.json (M2) + discordance_oof.csv (M4). Trung thuc voi n nho.
+    """
+    m2 = _m2_baselines().get("discordance", {})
+    comparison = []
+    if "ldl_only_logistic" in m2:
+        comparison.append({"model": "LDL-C only", **_pick(m2["ldl_only_logistic"])})
+    if "full_tabular" in m2:
+        comparison.append({"model": "Tabular (XGBoost)", **_pick(m2["full_tabular"])})
+    mm = _multimodal_discordance()
+    if mm:
+        comparison.append({"model": "Multimodal", **mm})
+    return {
+        "n_total": m2.get("n_total"),
+        "n_positive": m2.get("n_positive"),
+        "warning": m2.get("warning"),
+        "method": m2.get("method"),
+        "comparison": comparison,
+        "lpa_stratified": _m2_baselines().get("lpa_stratified", []),
+        "cases": _discordance_cases(),
+    }
+
+
+def _pick(d: dict) -> dict:
+    """Lay sens/spec/f1 (so phang) tu object metric cua M2."""
+    return {k: d.get(k) for k in ("sensitivity", "specificity", "f1")}
 
 
 def _read_vision() -> list[dict]:
