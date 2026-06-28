@@ -120,3 +120,8 @@ cache/
 temp/
 
 /local
+# m5/web frontend: cac pattern output o tren (lib/, results/) nuot nham 2 thu muc nay
+!m5/web/src/lib/
+!m5/web/src/lib/**
+!m5/web/src/app/results/
+!m5/web/src/app/results/**
