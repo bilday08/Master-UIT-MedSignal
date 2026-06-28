@@ -201,8 +201,9 @@ def discordance_data() -> dict:
     return {
         "n_total": m2.get("n_total"),
         "n_positive": m2.get("n_positive"),
-        "warning": m2.get("warning"),
-        "method": m2.get("method"),
+        # Lam sach em-dash trong text M2 truoc khi tra ve (don't mutate file goc).
+        "warning": str(m2.get("warning", "")).replace(" — ", ", ").replace("—", ", "),
+        "method": str(m2.get("method", "")).replace(" — ", ", ").replace("—", ", "),
         "comparison": comparison,
         "lpa_stratified": _m2_baselines().get("lpa_stratified", []),
         "cases": _discordance_cases(),

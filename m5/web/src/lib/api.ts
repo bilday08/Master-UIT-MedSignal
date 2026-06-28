@@ -4,7 +4,7 @@
 export const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
-// 8 numeric + Sex — khop feature_columns cua backend.
+// 8 numeric + Sex, khop feature_columns cua backend.
 export const NUMERIC_FEATURES = [
   "Age",
   "Lp(a)_mg_dL",

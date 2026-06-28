@@ -17,7 +17,7 @@ import {
 } from "@/lib/api";
 
 function fmt(x: number | null | undefined, d = 3) {
-  return x == null ? "—" : x.toFixed(d);
+  return x == null ? "–" : x.toFixed(d);
 }
 
 function best(rows: Record<string, number | string>[], key: string, mode: "max" | "min") {
